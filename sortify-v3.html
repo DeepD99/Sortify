@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sortify v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#080808;
+  --s1:#0f0f0f;
+  --s2:#161616;
+  --s3:#1c1c1c;
+  --border:#252525;
+  --border2:#303030;
+  --g:#b8ff57;
+  --g2:#57d4ff;
+  --g3:#ff5757;
+  --g4:#ffc857;
+  --text:#efefef;
+  --muted:#505050;
+  --muted2:#808080;
+  --r:3px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden}
+.mono{font-family:'Azeret Mono',monospace}
+
+/* ── HEADER ── */
+header{
+  width:100%;padding:1.4rem 2.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:1.2rem;
+  position:sticky;top:0;z-index:100;
+  background:rgba(8,8,8,0.9);backdrop-filter:blur(12px);
+}
+.logo{font-size:1.5rem;font-weight:700;letter-spacing:-1px;color:var(--g);line-height:1}
+.logo span{color:var(--text);opacity:0.3}
+.version{font-family:'Azeret Mono',monospace;font-size:0.6rem;color:var(--g2);border:1px solid var(--g2);padding:0.15rem 0.5rem;letter-spacing:1px;opacity:0.7;margin-left:0.3rem}
+.source-pills{margin-left:auto;display:flex;gap:0.5rem}
+.spill{font-size:0.6rem;font-family:'Azeret Mono',monospace;padding:0.2rem 0.6rem;border-radius:20px;letter-spacing:0.5px}
+.spill.spotify{background:rgba(30,215,96,0.12);color:#1ed760;border:1px solid rgba(30,215,96,0.3)}
+.spill.cyanite{background:rgba(88,100,255,0.12);color:#7c87ff;border:1px solid rgba(88,100,255,0.3)}
+.spill.lastfm{background:rgba(210,0,0,0.12);color:#ff6b6b;border:1px solid rgba(210,0,0,0.3)}
+
+/* ── CONTAINER ── */
+.wrap{width:100%;max-width:960px;padding:2.5rem 1.5rem 6rem}
+
+/* ── STEPS NAV ── */
+.steps-nav{display:flex;gap:0;margin-bottom:3rem;border:1px solid var(--border);overflow:hidden}
+.step-dot{flex:1;padding:0.8rem 0.5rem;text-align:center;font-size:0.65rem;font-family:'Azeret Mono',monospace;letter-spacing:1px;color:var(--muted);border-right:1px solid var(--border);text-transform:uppercase;transition:background 0.2s,color 0.2s;cursor:default}
+.step-dot:last-child{border-right:none}
+.step-dot.active{background:var(--s2);color:var(--g)}
+.step-dot.done{background:rgba(184,255,87,0.05);color:var(--g);opacity:0.5}
+
+/* ── CARDS & SECTIONS ── */
+.card{background:var(--s1);border:1px solid var(--border);padding:2rem;margin-bottom:1.5rem}
+.card-title{font-size:0.65rem;font-family:'Azeret Mono',monospace;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:1.2rem;display:flex;align-items:center;gap:0.8rem}
+.card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.card-title .src-tag{font-size:0.55rem;padding:0.15rem 0.5rem;border-radius:20px}
+.src-spotify{background:rgba(30,215,96,0.15);color:#1ed760;border:1px solid rgba(30,215,96,0.25)}
+.src-cyanite{background:rgba(124,135,255,0.15);color:#7c87ff;border:1px solid rgba(124,135,255,0.25)}
+.src-lastfm{background:rgba(255,107,107,0.15);color:#ff6b6b;border:1px solid rgba(255,107,107,0.25)}
+.src-all{background:rgba(255,200,87,0.15);color:var(--g4);border:1px solid rgba(255,200,87,0.25)}
+
+/* ── FORM ── */
+.field{margin-bottom:1.5rem}
+.field label{display:block;font-size:0.65rem;font-family:'Azeret Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);margin-bottom:0.5rem}
+.field label .hint{font-size:0.6rem;color:var(--muted);text-transform:none;letter-spacing:0;margin-left:0.5rem;font-family:'Space Grotesk',sans-serif}
+.field input,.field select{
+  width:100%;background:var(--s2);border:1px solid var(--border2);color:var(--text);
+  padding:0.75rem 1rem;font-family:'Azeret Mono',monospace;font-size:0.82rem;outline:none;
+  transition:border-color 0.2s;border-radius:var(--r)
+}
+.field input:focus,.field select:focus{border-color:var(--g)}
+.field input::placeholder{color:var(--muted)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+
+/* ── INSTRUCTIONS ── */
+.instr{
+  background:var(--s1);border:1px solid var(--border);border-left:2px solid var(--g);
+  padding:1.2rem 1.5rem;font-size:0.75rem;line-height:2;color:var(--muted2);margin-bottom:2rem;border-radius:var(--r)
+}
+.instr strong{color:var(--text)}
+.instr a{color:var(--g);text-decoration:none}
+.instr a:hover{text-decoration:underline}
+.instr code{background:rgba(184,255,87,0.08);padding:0.1rem 0.4rem;color:var(--g);font-family:'Azeret Mono',monospace;font-size:0.75rem}
+.instr-block{background:var(--s2);border:1px solid var(--border);border-left:2px solid var(--g2);padding:1rem 1.5rem;font-size:0.73rem;line-height:1.9;color:var(--muted2);margin-bottom:1.2rem;border-radius:var(--r)}
+.instr-block strong{color:var(--g2)}
+
+/* ── BUTTONS ── */
+.btn{
+  background:var(--g);color:#000;border:none;padding:0.85rem 2rem;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.85rem;
+  cursor:pointer;letter-spacing:0.3px;transition:opacity 0.15s,transform 0.1s;border-radius:var(--r)
+}
+.btn:hover{opacity:0.88}
+.btn:active{transform:scale(0.98)}
+.btn:disabled{opacity:0.3;cursor:not-allowed}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border2)}
+.btn-secondary:hover{border-color:var(--muted2)}
+.btn-sm{padding:0.5rem 1rem;font-size:0.75rem}
+.btn-row{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+
+/* ── PLAYLIST PICKER ── */
+.pl-grid{
+  display:flex;flex-direction:column;gap:0.4rem;
+  max-height:380px;overflow-y:auto;border:1px solid var(--border);background:var(--s2);padding:0.4rem
+}
+.pl-item{
+  display:flex;align-items:center;gap:0.8rem;padding:0.6rem 0.8rem;
+  cursor:pointer;border:1px solid transparent;border-radius:var(--r);transition:all 0.12s;user-select:none
+}
+.pl-item:hover{background:var(--s3)}
+.pl-item.sel{border-color:var(--g);background:rgba(184,255,87,0.04)}
+.pl-img{width:38px;height:38px;object-fit:cover;flex-shrink:0;background:var(--border);border-radius:2px}
+.pl-name{font-weight:600;font-size:0.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-meta{font-size:0.65rem;color:var(--muted2);margin-top:0.1rem;font-family:'Azeret Mono',monospace}
+.pl-check{width:16px;height:16px;border:1px solid var(--border2);flex-shrink:0;margin-left:auto;border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:var(--g)}
+.pl-item.sel .pl-check{background:rgba(184,255,87,0.15);border-color:var(--g)}
+
+.pick-bar{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.8rem;flex-wrap:wrap}
+.pick-bar span{margin-left:auto;font-size:0.7rem;color:var(--muted2);font-family:'Azeret Mono',monospace}
+
+/* ── SLIDER ── */
+.slider-wrap{display:flex;align-items:center;gap:1rem;margin-top:0.5rem}
+.slider-wrap input[type=range]{flex:1;accent-color:var(--g)}
+.slider-label{font-size:0.7rem;color:var(--muted2)}
+.slider-val{font-family:'Azeret Mono',monospace;color:var(--g);font-size:0.85rem;min-width:2.5rem;text-align:right}
+.slider-desc{font-size:0.72rem;color:var(--muted2);line-height:1.7;margin-top:0.5rem}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;gap:0.8rem;margin-top:0.8rem;cursor:pointer}
+.toggle-row input{accent-color:var(--g);width:14px;height:14px}
+.toggle-row span{font-size:0.78rem;color:var(--muted2)}
+
+/* ── PROGRESS ── */
+.progress-card{background:var(--s1);border:1px solid var(--border);padding:2rem;margin-bottom:1.2rem;border-radius:var(--r)}
+.prog-bar-bg{background:var(--s2);border:1px solid var(--border);height:4px;overflow:hidden;border-radius:2px;margin:1rem 0}
+.prog-bar-fill{height:100%;background:var(--g);transition:width 0.5s ease;width:0%}
+.prog-label{font-size:0.68rem;color:var(--muted2);font-family:'Azeret Mono',monospace}
+
+/* ── LOG ── */
+.log{
+  background:var(--bg);border:1px solid var(--border);
+  padding:1rem;height:220px;overflow-y:auto;
+  font-size:0.7rem;line-height:1.9;border-radius:var(--r)
+}
+.l{color:var(--muted2)}
+.l.ok{color:var(--g)}
+.l.info{color:var(--g2)}
+.l.warn{color:var(--g4)}
+.l.err{color:var(--g3)}
+.l.src-c{color:#7c87ff}
+.l.src-l{color:#ff6b6b}
+
+/* ── RESULTS ── */
+.results-list{display:flex;flex-direction:column;gap:0.8rem}
+.res-row{
+  background:var(--s1);border:1px solid var(--border);
+  display:grid;grid-template-columns:52px 1fr auto auto;
+  align-items:center;gap:1rem;padding:1rem 1.2rem;border-radius:var(--r);
+}
+.res-img{width:52px;height:52px;object-fit:cover;background:var(--border);border-radius:2px}
+.res-name{font-weight:700;font-size:0.9rem;margin-bottom:0.15rem}
+.res-meta{font-size:0.65rem;color:var(--muted2);font-family:'Azeret Mono',monospace}
+.res-count{font-weight:700;font-size:1.4rem;color:var(--g);text-align:right;white-space:nowrap}
+.res-count small{font-size:0.6rem;color:var(--muted2);display:block;text-align:right;font-family:'Azeret Mono',monospace;font-weight:400}
+.res-open{font-size:0.68rem;color:var(--g2);text-decoration:none;white-space:nowrap}
+.res-open:hover{text-decoration:underline}
+
+/* ── CENTROID PILLS ── */
+.cpills{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.4rem}
+.cp{font-size:0.58rem;padding:0.12rem 0.45rem;border-radius:20px;border:1px solid var(--border2);color:var(--muted2);font-family:'Azeret Mono',monospace}
+.cp.hi{border-color:var(--g);color:var(--g)}
+.cp.mood{border-color:var(--g2);color:var(--g2)}
+
+/* ── SKELETONS ── */
+.skel{
+  background:linear-gradient(90deg,var(--s1) 25%,var(--s2) 50%,var(--s1) 75%);
+  background-size:200% 100%;animation:skel 1.4s infinite;
+  height:54px;border:1px solid var(--border);border-radius:var(--r)
+}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ── STAT BOXES ── */
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:0.8rem;margin-bottom:1.5rem}
+.stat-box{background:var(--s2);border:1px solid var(--border);padding:1rem 1.2rem;border-radius:var(--r)}
+.stat-num{font-family:'Azeret Mono',monospace;font-size:1.6rem;font-weight:500;color:var(--g)}
+.stat-label{font-size:0.65rem;color:var(--muted2);margin-top:0.2rem;text-transform:uppercase;letter-spacing:1px}
+
+/* ── SKIPPED NOTICE ── */
+.skipped-notice{background:rgba(255,200,87,0.05);border:1px solid rgba(255,200,87,0.2);padding:1rem 1.2rem;font-size:0.73rem;color:var(--g4);border-radius:var(--r);margin-top:0.8rem;line-height:1.7}
+
+/* ── MISC ── */
+.hidden{display:none!important}
+.sep{height:1px;background:var(--border);margin:2rem 0}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--border2)}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">SORTIFY<span>/</span>3</div>
+  </div>
+  <span class="version">MULTI-SOURCE</span>
+  <div class="source-pills">
+    <span class="spill spotify">Spotify</span>
+    <span class="spill cyanite">Cyanite</span>
+    <span class="spill lastfm">Last.fm</span>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- STEPS NAV -->
+  <div class="steps-nav" id="steps-nav">
+    <div class="step-dot active" data-step="0">01 · Keys</div>
+    <div class="step-dot" data-step="1">02 · Playlists</div>
+    <div class="step-dot" data-step="2">03 · Options</div>
+    <div class="step-dot" data-step="3">04 · Processing</div>
+    <div class="step-dot" data-step="4">05 · Done</div>
+  </div>
+
+  <!-- ═══════════════════════════════ STEP 0: API KEYS ═══ -->
+  <div id="step-0">
+
+    <div class="instr">
+      <strong>Setup — three services, all free for personal use:</strong><br/>
+      <strong>1. Spotify</strong> → <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a> → Create app → Add Redirect URI: <code id="redir-display">loading...</code> → Enable Web API → copy Client ID<br/>
+      <strong>2. Cyanite</strong> → <a href="https://api.cyanite.ai" target="_blank">api.cyanite.ai</a> → Create free account → Settings → Access Tokens → Create token → copy it. Gives BPM, key, mood, genre.<br/>
+      <strong>3. Last.fm</strong> → <a href="https://www.last.fm/api/account/create" target="_blank">last.fm/api/account/create</a> → Create API account (free, instant) → copy API key. Gives crowd-sourced genre/mood tags.
+    </div>
+
+    <div class="card">
+      <div class="card-title">Spotify <span class="src-tag src-spotify">via OAuth PKCE</span></div>
+      <div class="field">
+        <label>Client ID <span class="hint">From your Spotify app dashboard</span></label>
+        <input type="text" id="sp-client-id" placeholder="e.g. 4a7b2c1d3e5f6a8b9c0d..."/>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cyanite <span class="src-tag src-cyanite">BPM · Key · Mood · Genre</span></div>
+      <div class="field">
+        <label>Access Token <span class="hint">From api.cyanite.ai → Settings → Access Tokens</span></label>
+        <input type="password" id="cy-token" placeholder="Your Cyanite access token..."/>
+      </div>
+      <div class="instr-block">
+        <strong>What Cyanite gives you:</strong> BPM prediction, musical key, mood tags (energetic, dark, happy, calm, epic…), genre (pop, hiphop, rock…), energy level, emotional profile. It analyzes via Spotify's 30-second preview using your track ID — no audio upload needed.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Last.fm <span class="src-tag src-lastfm">Crowd Tags · Genre</span></div>
+      <div class="field">
+        <label>API Key <span class="hint">From last.fm/api/account/create — instant, no approval needed</span></label>
+        <input type="text" id="lfm-key" placeholder="Your Last.fm API key..."/>
+      </div>
+      <div class="instr-block">
+        <strong>What Last.fm adds:</strong> Crowd-sourced tags (e.g. "indie", "workout", "rainy day", "female vocalists", "2000s"). These supplement Cyanite's AI tags and fill gaps when Cyanite hasn't analyzed a track yet. The two together give excellent coverage.
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-connect">Connect to Spotify →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ STEP 1: PICK PLAYLISTS ═══ -->
+  <div id="step-1" class="hidden">
+
+    <div class="card">
+      <div class="card-title">Target Playlists <span class="src-tag src-spotify">your playlists</span></div>
+      <p style="font-size:0.75rem;color:var(--muted2);line-height:1.8;margin-bottom:1.2rem">
+        Select which of your playlists liked songs should be sorted into.
+        Each playlist will be fingerprinted using <strong>Cyanite analysis</strong> of its existing tracks
+        to build an audio centroid (average BPM, mood, genre profile).
+        Liked songs are then matched to the nearest centroid, boosted by playlist name keywords.
+      </p>
+
+      <div class="pick-bar">
+        <button class="btn btn-secondary btn-sm" id="btn-all">All</button>
+        <button class="btn btn-secondary btn-sm" id="btn-none">None</button>
+        <span id="pick-count" class="mono">0 selected</span>
+      </div>
+      <div class="pl-grid" id="pl-grid">
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-to-opts" disabled>Configure Options →</button>
+      <button class="btn btn-secondary" id="btn-back-0">← Back</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ STEP 2: OPTIONS ═══ -->
+  <div id="step-2" class="hidden">
+
+    <div class="card">
+      <div class="card-title">Matching Options <span class="src-tag src-all">classification tuning</span></div>
+
+      <div class="field">
+        <label>Confidence Threshold
+          <span class="hint">How strict the match must be before adding to a playlist</span>
+        </label>
+        <div class="slider-wrap">
+          <span class="slider-label">Strict</span>
+          <input type="range" id="thresh" min="0.1" max="1.0" step="0.05" value="0.6"/>
+          <span class="slider-label">Loose</span>
+          <span class="slider-val" id="thresh-val">0.60</span>
+        </div>
+        <div class="slider-desc">Songs too different from all your playlists are skipped rather than force-matched. Lower = fewer songs added but higher accuracy. Recommended: 0.55–0.70</div>
+      </div>
+
+      <div class="field">
+        <label>Cyanite Sample Rate
+          <span class="hint">How many tracks per playlist to analyze for fingerprinting</span>
+        </label>
+        <div class="slider-wrap">
+          <span class="slider-label">10</span>
+          <input type="range" id="sample-rate" min="10" max="100" step="5" value="30"/>
+          <span class="slider-label">100</span>
+          <span class="slider-val" id="sample-val">30</span>
+        </div>
+        <div class="slider-desc">More samples = better fingerprint but more API calls. 30 is a good balance. Cyanite free tier has rate limits so keep this reasonable.</div>
+      </div>
+
+      <div class="sep"></div>
+
+      <label class="toggle-row">
+        <input type="checkbox" id="opt-keywords" checked/>
+        <span>🔤 Playlist name keyword boosting — nudges ambiguous matches toward semantically aligned playlists (e.g. "gym" boosts high-BPM/energy songs)</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="opt-lastfm" checked/>
+        <span>🔴 Use Last.fm tags to supplement Cyanite data — fills gaps when Cyanite hasn't analyzed a track</span>
+      </label>
+      <label class="toggle-row">
+        <input type="checkbox" id="opt-dupes" checked/>
+        <span>🔁 Skip songs already in target playlist (de-duplication)</span>
+      </label>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btn-run">Analyse & Sort →</button>
+      <button class="btn btn-secondary" id="btn-back-1">← Back</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════ STEP 3: PROCESSING ═══ -->
+  <div id="step-3" class="hidden">
+    <div class="progress-card">
+      <div style="font-size:0.65rem;font-family:'Azeret Mono',monospace;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);margin-bottom:0.5rem">Processing</div>
+      <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+      <div class="prog-label" id="prog-label">Initializing...</div>
+    </div>
+    <div class="log" id="log"></div>
+  </div>
+
+  <!-- ═══════════════════════════════ STEP 4: RESULTS ═══ -->
+  <div id="step-4" class="hidden">
+    <div class="stat-row" id="stat-row"></div>
+    <div class="results-list" id="results-list"></div>
+    <div id="skipped-notice"></div>
+    <div class="btn-row">
+      <button class="btn btn-secondary" id="btn-restart">← Start Over</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+'use strict';
+// ══════════════════════════════════════════════════════════════════
+// CONSTANTS & CONFIG
+// ══════════════════════════════════════════════════════════════════
+const CYANITE_ENDPOINT = 'https://api.cyanite.ai/graphql';
+const LASTFM_ENDPOINT  = 'https://ws.audioscrobbler.com/2.0/';
+const SP_SCOPES = 'user-library-read playlist-read-private playlist-modify-private playlist-modify-public';
+
+// Keyword clusters for name boosting
+// Maps playlist name words → which features they imply
+const KW_CLUSTERS = [
+  {words:['workout','gym','run','beast','pump','lift','running','sport','exercise'],  moods:['energetic'],   genres:['electronicDance','pop'],     bpmMin:120},
+  {words:['chill','relax','lofi','lo-fi','calm','sleep','ambient','soft','study'],    moods:['calm','chilled'],genres:['ambient'],                  bpmMax:100},
+  {words:['party','dance','club','festival','banger','turn','hype','rave'],           moods:['energetic','happy'], genres:['electronicDance','pop'], bpmMin:120},
+  {words:['sad','feels','emo','cry','blue','heartbreak','melancholy','depressed'],    moods:['sad','dark'],   genres:['folkCountry','singerSongwriter']},
+  {words:['happy','joy','good','summer','fun','upbeat','vibes','sunshine'],           moods:['happy','uplifting'],genres:['pop']},
+  {words:['focus','deep','work','concentration','flow','productivity'],               moods:['calm'],         genres:['ambient','classical']},
+  {words:['acoustic','folk','coffee','morning','coffee','unplugged','raw'],           genres:['folkCountry','singerSongwriter','blues']},
+  {words:['hiphop','rap','hip','hop','trap','drill','bars'],                          genres:['rapHipHop']},
+  {words:['rock','metal','punk','grunge','alt','alternative','indie'],                genres:['rock','metal']},
+  {words:['jazz','blues','soul','funk','rnb','r&b','groove'],                         genres:['jazz','blues','funkSoul','rnb']},
+  {words:['country','country','western','twang','nashville'],                         genres:['folkCountry']},
+  {words:['night','late','dark','midnight','moody','noir'],                           moods:['dark']},
+  {words:['epic','cinematic','score','film','trailer','power'],                       moods:['epic']},
+];
+
+// Cyanite mood labels
+const ALL_MOODS = ['energetic','dark','happy','calm','sad','chilled','romantic','epic','uplifting','aggressive','scary','sexy','ethereal'];
+// Cyanite genre labels
+const ALL_GENRES = ['ambient','blues','classical','electronicDance','folkCountry','funkSoul','jazz','latin','metal','pop','rapHipHop','reggae','rnb','rock','singerSongwriter'];
+
+// ══════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════
+let spToken=null, userId=null, clientId=null;
+let cyToken=null, lfmKey=null;
+let allPlaylists=[], selectedPlIds=new Set();
+let currentStep=0;
+
+// ══════════════════════════════════════════════════════════════════
+// PKCE AUTH
+// ══════════════════════════════════════════════════════════════════
+function genVerifier(){
+  const a=new Uint8Array(32); crypto.getRandomValues(a);
+  return btoa(String.fromCharCode(...a)).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+async function genChallenge(v){
+  const d=new TextEncoder().encode(v);
+  const h=await crypto.subtle.digest('SHA-256',d);
+  return btoa(String.fromCharCode(...new Uint8Array(h))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+}
+function redir(){return window.location.href.split('?')[0].split('#')[0]}
+
+// ══════════════════════════════════════════════════════════════════
+// SPOTIFY API
+// ══════════════════════════════════════════════════════════════════
+async function spGet(url){
+  let res=await fetch(url,{headers:{Authorization:`Bearer ${spToken}`}});
+  if(res.status===429){await sleep(parseInt(res.headers.get('Retry-After')||'2')*1000);return spGet(url);}
+  if(!res.ok) throw new Error(`Spotify ${res.status}: ${url}`);
+  return res.json();
+}
+async function spPages(url){
+  let items=[],next=url;
+  while(next){const d=await spGet(next);items=items.concat(d.items||[]);next=d.next;}
+  return items;
+}
+async function spAddToPlaylist(plId,uris){
+  for(let i=0;i<uris.length;i+=100){
+    await fetch(`https://api.spotify.com/v1/playlists/${plId}/tracks`,{
+      method:'POST',
+      headers:{Authorization:`Bearer ${spToken}`,'Content-Type':'application/json'},
+      body:JSON.stringify({uris:uris.slice(i,i+100)})
+    });
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CYANITE API — GraphQL
+// spotifyTrack(id) → audioAnalysisV6 → bpm, key, mood, genre, energy
+// ══════════════════════════════════════════════════════════════════
+const CY_QUERY = `
+query SortifyTrack($id: ID!) {
+  spotifyTrack(id: $id) {
+    __typename
+    id
+    ... on SpotifyTrack {
+      audioAnalysisV6 {
+        __typename
+        ... on AudioAnalysisV6Finished {
+          result {
+            bpmPrediction { value }
+            key { value }
+            moodTags
+            genreTags
+            energyLevel { value }
+            valence { value }
+          }
+        }
+        ... on AudioAnalysisV6Processing { }
+        ... on AudioAnalysisV6Enqueued  { }
+        ... on AudioAnalysisV6Failed    { error { message } }
+        ... on AudioAnalysisV6NotAuthorized { message }
+      }
+    }
+  }
+}`;
+
+async function cyAnalyze(spotifyTrackId){
+  try{
+    const res=await fetch(CYANITE_ENDPOINT,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${cyToken}`},
+      body:JSON.stringify({query:CY_QUERY,variables:{id:spotifyTrackId}})
+    });
+    const json=await res.json();
+    const track=json?.data?.spotifyTrack;
+    if(!track || track.__typename!=='SpotifyTrack') return null;
+    const analysis=track.audioAnalysisV6;
+    if(!analysis || analysis.__typename!=='AudioAnalysisV6Finished') return null;
+    const r=analysis.result;
+    return {
+      bpm: r.bpmPrediction?.value||null,
+      key: r.key?.value||null,
+      moods: r.moodTags||[],
+      genres: r.genreTags||[],
+      energy: r.energyLevel?.value||null,
+      valence: r.valence?.value||null,
+      source:'cyanite'
+    };
+  }catch(e){return null;}
+}
+
+// Normalize energy string to 0-1
+function energyToNum(e){
+  const map={low:0.2,'low-medium':0.35,medium:0.5,'medium-high':0.65,high:0.8,'very high':0.95};
+  return map[e?.toLowerCase()]??0.5;
+}
+function valenceToNum(v){
+  const map={negative:0.1,'negative-neutral':0.3,neutral:0.5,'positive-neutral':0.7,positive:0.9};
+  return map[v?.toLowerCase()]??0.5;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LAST.FM API — track.getTopTags
+// Returns crowd-sourced tags like "indie", "workout", "female vocalists"
+// No auth required beyond API key
+// ══════════════════════════════════════════════════════════════════
+async function lfmGetTags(artist,track){
+  if(!lfmKey) return [];
+  try{
+    const url=`${LASTFM_ENDPOINT}?method=track.getTopTags&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(track)}&api_key=${lfmKey}&format=json&limit=10`;
+    const res=await fetch(url);
+    const json=await res.json();
+    return (json?.toptags?.tag||[]).map(t=>t.name.toLowerCase());
+  }catch(e){return [];}
+}
+
+// Normalize Last.fm tags → Cyanite-compatible mood/genre signals
+function lfmTagsToSignals(tags){
+  const moods=[], genres=[];
+  const tagStr=tags.join(' ');
+  // mood signals
+  if(/workout|gym|running|exercise|sport/.test(tagStr)) moods.push('energetic');
+  if(/chill|relax|calm|ambient|sleep|study/.test(tagStr)) moods.push('calm','chilled');
+  if(/sad|emo|heartbreak|melancholy|cry/.test(tagStr)) moods.push('sad','dark');
+  if(/happy|fun|upbeat|sunshine|joy/.test(tagStr)) moods.push('happy','uplifting');
+  if(/epic|cinematic|powerful|trailer/.test(tagStr)) moods.push('epic');
+  if(/dark|moody|night|noir/.test(tagStr)) moods.push('dark');
+  // genre signals
+  if(/hip.?hop|rap|trap|drill/.test(tagStr)) genres.push('rapHipHop');
+  if(/rock|punk|grunge|alt/.test(tagStr)) genres.push('rock');
+  if(/metal|heavy|thrash/.test(tagStr)) genres.push('metal');
+  if(/jazz/.test(tagStr)) genres.push('jazz');
+  if(/blues/.test(tagStr)) genres.push('blues');
+  if(/classical|orchestra|symphony/.test(tagStr)) genres.push('classical');
+  if(/electronic|edm|techno|house|dance/.test(tagStr)) genres.push('electronicDance');
+  if(/folk|country|acoustic/.test(tagStr)) genres.push('folkCountry');
+  if(/soul|funk|r.?b|rnb/.test(tagStr)) genres.push('funkSoul','rnb');
+  if(/latin|reggaeton|salsa/.test(tagStr)) genres.push('latin');
+  if(/reggae/.test(tagStr)) genres.push('reggae');
+  if(/pop/.test(tagStr)) genres.push('pop');
+  return {moods:[...new Set(moods)],genres:[...new Set(genres)]};
+}
+
+// ══════════════════════════════════════════════════════════════════
+// FINGERPRINTING & MATCHING
+// ══════════════════════════════════════════════════════════════════
+
+// Build a centroid from a list of track analyses
+// Centroid = average feature vector over all analyzed tracks
+function buildCentroid(analyses){
+  if(!analyses.length) return null;
+  // BPM — average
+  const bpms=analyses.map(a=>a.bpm).filter(Boolean);
+  const avgBpm=bpms.length ? bpms.reduce((s,v)=>s+v,0)/bpms.length : null;
+  // Energy — average
+  const energies=analyses.map(a=>typeof a.energy==='number'?a.energy:energyToNum(a.energy)).filter(v=>v!=null);
+  const avgEnergy=energies.length ? energies.reduce((s,v)=>s+v,0)/energies.length : 0.5;
+  // Valence — average
+  const valences=analyses.map(a=>typeof a.valence==='number'?a.valence:valenceToNum(a.valence)).filter(v=>v!=null);
+  const avgValence=valences.length ? valences.reduce((s,v)=>s+v,0)/valences.length : 0.5;
+  // Mood — frequency map (how often each mood appears)
+  const moodFreq={};
+  analyses.forEach(a=>(a.moods||[]).forEach(m=>{moodFreq[m]=(moodFreq[m]||0)+1}));
+  ALL_MOODS.forEach(m=>{if(!moodFreq[m]) moodFreq[m]=0});
+  const totalMoods=analyses.length;
+  const moodVec={};
+  ALL_MOODS.forEach(m=>moodVec[m]=(moodFreq[m]||0)/totalMoods);
+  // Genre — same
+  const genreFreq={};
+  analyses.forEach(a=>(a.genres||[]).forEach(g=>{genreFreq[g]=(genreFreq[g]||0)+1}));
+  ALL_GENRES.forEach(g=>{if(!genreFreq[g]) genreFreq[g]=0});
+  const genreVec={};
+  ALL_GENRES.forEach(g=>genreVec[g]=(genreFreq[g]||0)/totalMoods);
+  return {bpm:avgBpm, energy:avgEnergy, valence:avgValence, moodVec, genreVec, sampleSize:analyses.length};
+}
+
+// Distance between two feature vectors
+// Combines: BPM distance + mood cosine distance + genre cosine distance + energy distance
+function distance(centroid, trackAnalysis){
+  let score=0, parts=0;
+  // BPM (normalized 60-200 BPM range → 0-1)
+  if(centroid.bpm && trackAnalysis.bpm){
+    const normC=(centroid.bpm-60)/140;
+    const normT=(trackAnalysis.bpm-60)/140;
+    score+=Math.abs(normC-normT);
+    parts++;
+  }
+  // Energy
+  const tEnergy=typeof trackAnalysis.energy==='number'?trackAnalysis.energy:energyToNum(trackAnalysis.energy);
+  score+=Math.abs(centroid.energy-tEnergy);
+  parts++;
+  // Valence
+  const tValence=typeof trackAnalysis.valence==='number'?trackAnalysis.valence:valenceToNum(trackAnalysis.valence);
+  score+=Math.abs(centroid.valence-tValence);
+  parts++;
+  // Mood vector — dot product similarity (converted to distance)
+  if(centroid.moodVec && trackAnalysis.moods?.length){
+    const tVec={};
+    ALL_MOODS.forEach(m=>tVec[m]=0);
+    trackAnalysis.moods.forEach(m=>{if(tVec[m]!==undefined) tVec[m]=1});
+    // cosine distance
+    let dot=0,magC=0,magT=0;
+    ALL_MOODS.forEach(m=>{
+      dot+=centroid.moodVec[m]*tVec[m];
+      magC+=centroid.moodVec[m]**2;
+      magT+=tVec[m]**2;
+    });
+    const cos= magC>0&&magT>0 ? dot/(Math.sqrt(magC)*Math.sqrt(magT)) : 0;
+    score+=(1-cos)*1.5; // weight mood more heavily
+    parts++;
+  }
+  // Genre vector
+  if(centroid.genreVec && trackAnalysis.genres?.length){
+    const tVec={};
+    ALL_GENRES.forEach(g=>tVec[g]=0);
+    trackAnalysis.genres.forEach(g=>{if(tVec[g]!==undefined) tVec[g]=1});
+    let dot=0,magC=0,magT=0;
+    ALL_GENRES.forEach(g=>{
+      dot+=centroid.genreVec[g]*tVec[g];
+      magC+=centroid.genreVec[g]**2;
+      magT+=tVec[g]**2;
+    });
+    const cos= magC>0&&magT>0 ? dot/(Math.sqrt(magC)*Math.sqrt(magT)) : 0;
+    score+=(1-cos)*2.0; // weight genre heavily — genre is the strongest signal
+    parts++;
+  }
+  return parts>0 ? score/parts : 1;
+}
+
+// Keyword bonus — reduces distance if playlist name semantically aligns with track
+function kwBonus(playlistName, analysis){
+  const name=playlistName.toLowerCase();
+  let bonus=0;
+  for(const cluster of KW_CLUSTERS){
+    const nameMatch=cluster.words.some(w=>name.includes(w));
+    if(!nameMatch) continue;
+    // Check if track aligns
+    const moodMatch=cluster.moods?.some(m=>analysis.moods?.includes(m))||false;
+    const genreMatch=cluster.genres?.some(g=>analysis.genres?.includes(g))||false;
+    const bpmMatch=cluster.bpmMin ? (analysis.bpm||0)>=cluster.bpmMin : cluster.bpmMax ? (analysis.bpm||200)<=cluster.bpmMax : false;
+    let align=0;
+    if(moodMatch) align+=0.35;
+    if(genreMatch) align+=0.45;
+    if(bpmMatch) align+=0.2;
+    bonus+=align*0.12; // max ~0.12 per matching cluster
+  }
+  return Math.min(bonus,0.35);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// LOGGER / PROGRESS
+// ══════════════════════════════════════════════════════════════════
+function log(msg,cls=''){
+  const el=document.getElementById('log');
+  if(!el) return;
+  const d=document.createElement('div');
+  d.className='l '+cls;
+  d.textContent=msg;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+function prog(pct,label){
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=label;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MAIN SORT FLOW
+// ══════════════════════════════════════════════════════════════════
+async function runSort(){
+  goStep(3);
+  const threshold=parseFloat(document.getElementById('thresh').value);
+  const sampleRate=parseInt(document.getElementById('sample-rate').value);
+  const useKeywords=document.getElementById('opt-keywords').checked;
+  const useLastfm=document.getElementById('opt-lastfm').checked;
+  const dedup=document.getElementById('opt-dupes').checked;
+  const targets=allPlaylists.filter(p=>selectedPlIds.has(p.id));
+
+  try{
+    // ─── 1. Fingerprint each target playlist ─────────────────────
+    log(`Fingerprinting ${targets.length} playlists using Cyanite...`,'info');
+    prog(3,'Fetching playlist tracks...');
+    const centroids=[];
+
+    for(let i=0;i<targets.length;i++){
+      const pl=targets[i];
+      prog(3+Math.round(i/targets.length*22),`Fingerprinting "${pl.name}"...`);
+      log(`  Analyzing "${pl.name}"...`);
+
+      // Fetch tracks from this playlist
+      const tracks=await spPages(`https://api.spotify.com/v1/playlists/${pl.id}/tracks?limit=50&fields=next,items(track(id,name,artists))`);
+      const sample=tracks.filter(t=>t.track?.id).slice(0,sampleRate);
+
+      if(!sample.length){log(`  ⚠ "${pl.name}" empty — skipping`,'warn');continue;}
+
+      // Analyze sample with Cyanite
+      const analyses=[];
+      for(const t of sample){
+        const cy=await cyAnalyze(t.track.id);
+        if(cy) analyses.push(cy);
+        await sleep(60); // gentle rate limiting for Cyanite
+      }
+
+      if(!analyses.length){
+        log(`  ⚠ "${pl.name}" — Cyanite returned no data (try checking your token or free tier limits)`,'warn');
+        continue;
+      }
+
+      const centroid=buildCentroid(analyses);
+      if(!centroid) continue;
+
+      // Human-readable description
+      const topMoods=ALL_MOODS.filter(m=>centroid.moodVec[m]>0.2).sort((a,b)=>centroid.moodVec[b]-centroid.moodVec[a]).slice(0,2);
+      const topGenres=ALL_GENRES.filter(g=>centroid.genreVec[g]>0.2).sort((a,b)=>centroid.genreVec[b]-centroid.genreVec[a]).slice(0,2);
+      const bpmStr=centroid.bpm ? `${Math.round(centroid.bpm)}bpm` : '?bpm';
+      log(`  ✓ "${pl.name}" → ${bpmStr}, moods:[${topMoods.join(',')||'mixed'}], genres:[${topGenres.join(',')||'mixed'}] (${analyses.length} tracks)`, 'ok');
+
+      centroids.push({playlist:pl, centroid, topMoods, topGenres});
+    }
+
+    if(!centroids.length) throw new Error('No playlists could be fingerprinted. Check your Cyanite token and try increasing sample rate.');
+
+    // ─── 2. Fetch liked songs ─────────────────────────────────────
+    prog(28,'Fetching liked songs...');
+    log('Fetching liked songs from Spotify...','info');
+    const liked=await spPages('https://api.spotify.com/v1/me/tracks?limit=50');
+    log(`✓ ${liked.length} liked songs found`,'ok');
+
+    // ─── 3. Build dupe sets ───────────────────────────────────────
+    let existingUris={};
+    if(dedup){
+      prog(33,'Building de-duplication index...');
+      for(const c of centroids){
+        const tks=await spPages(`https://api.spotify.com/v1/playlists/${c.playlist.id}/tracks?limit=50&fields=next,items(track(uri))`);
+        existingUris[c.playlist.id]=new Set(tks.map(t=>t.track?.uri).filter(Boolean));
+      }
+    }
+
+    // ─── 4. Analyze liked songs ───────────────────────────────────
+    prog(37,'Analyzing liked songs...');
+    log(`Analyzing ${liked.length} liked songs (Cyanite + Last.fm)...`,'info');
+
+    const buckets={};
+    centroids.forEach(c=>buckets[c.playlist.id]=[]);
+    let matched=0, skipped_conf=0, skipped_dupe=0, cy_hits=0, lfm_hits=0, no_data=0;
+
+    for(let i=0;i<liked.length;i++){
+      const item=liked[i];
+      if(!item?.track?.id) continue;
+      const track=item.track;
+
+      prog(37+Math.round(i/liked.length*48),`Analyzing ${i+1}/${liked.length}: ${track.name}`);
+
+      // Cyanite analysis first
+      let analysis=await cyAnalyze(track.id);
+      if(analysis) cy_hits++;
+
+      // Last.fm tags to fill gaps or supplement
+      if(useLastfm && (!analysis || !analysis.moods?.length || !analysis.genres?.length)){
+        const artist=track.artists?.[0]?.name||'';
+        const tags=await lfmGetTags(artist,track.name);
+        if(tags.length){
+          const sigs=lfmTagsToSignals(tags);
+          lfm_hits++;
+          if(!analysis){
+            analysis={bpm:null,key:null,moods:sigs.moods,genres:sigs.genres,energy:null,valence:null,source:'lastfm'};
+            log(`  [lfm] ${track.name} → tags: ${tags.slice(0,4).join(', ')}`,'src-l');
+          } else {
+            // Merge Last.fm signals in
+            analysis.moods=[...new Set([...analysis.moods,...sigs.moods])];
+            analysis.genres=[...new Set([...analysis.genres,...sigs.genres])];
+            analysis.source='both';
+          }
+        }
+      }
+
+      if(!analysis || (!analysis.moods?.length && !analysis.genres?.length)){
+        no_data++;
+        continue; // truly no data — skip
+      }
+
+      // Find nearest centroid
+      let bestDist=Infinity, bestCentroid=null;
+      for(const c of centroids){
+        let dist=distance(c.centroid, analysis);
+        if(useKeywords) dist-=kwBonus(c.playlist.name, analysis);
+        if(dist<bestDist){bestDist=dist;bestCentroid=c;}
+      }
+
+      if(bestDist>threshold){skipped_conf++;continue;}
+      if(dedup && existingUris[bestCentroid.playlist.id]?.has(track.uri)){skipped_dupe++;continue;}
+
+      buckets[bestCentroid.playlist.id].push(track.uri);
+      matched++;
+
+      await sleep(80); // rate limit buffer between song analyses
+    }
+
+    log(`✓ Matched: ${matched} | Low confidence: ${skipped_conf} | Dupes: ${skipped_dupe} | No data: ${no_data}`,'ok');
+    log(`  Cyanite hits: ${cy_hits} | Last.fm fills: ${lfm_hits}`);
+
+    // ─── 5. Push to Spotify ───────────────────────────────────────
+    prog(87,'Adding tracks to playlists...');
+    log('Pushing matched tracks to Spotify playlists...','info');
+    const results=[];
+    for(let i=0;i<centroids.length;i++){
+      const c=centroids[i];
+      const uris=buckets[c.playlist.id];
+      prog(87+Math.round(i/centroids.length*13),`Updating "${c.playlist.name}"...`);
+      if(uris.length){
+        await spAddToPlaylist(c.playlist.id,uris);
+        log(`✓ +${uris.length} → "${c.playlist.name}"`,'ok');
+      } else {
+        log(`  "${c.playlist.name}": no matches`,'warn');
+      }
+      results.push({...c, count:uris.length});
+    }
+
+    prog(100,`Done! ${matched} songs sorted across ${centroids.length} playlists.`);
+    log(`🎉 All done!`,'ok');
+
+    showResults(results, {matched, skipped_conf, skipped_dupe, no_data, cy_hits, lfm_hits});
+
+  }catch(e){
+    log(`ERROR: ${e.message}`,'err');
+    console.error(e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RESULTS UI
+// ══════════════════════════════════════════════════════════════════
+function showResults(results, stats){
+  goStep(4);
+
+  document.getElementById('stat-row').innerHTML=`
+    <div class="stat-box"><div class="stat-num">${stats.matched}</div><div class="stat-label">Songs Sorted</div></div>
+    <div class="stat-box"><div class="stat-num">${stats.cy_hits}</div><div class="stat-label">Cyanite Analyses</div></div>
+    <div class="stat-box"><div class="stat-num">${stats.lfm_hits}</div><div class="stat-label">Last.fm Fills</div></div>
+  `;
+
+  const sorted=[...results].sort((a,b)=>b.count-a.count);
+  document.getElementById('results-list').innerHTML=sorted.map(r=>{
+    const bpmStr=r.centroid.bpm?`${Math.round(r.centroid.bpm)} BPM`:'? BPM';
+    const topMoods=ALL_MOODS.filter(m=>r.centroid.moodVec[m]>0.2).sort((a,b)=>r.centroid.moodVec[b]-r.centroid.moodVec[a]).slice(0,3);
+    const topGenres=ALL_GENRES.filter(g=>r.centroid.genreVec[g]>0.2).sort((a,b)=>r.centroid.genreVec[b]-r.centroid.genreVec[a]).slice(0,2);
+    return `
+    <div class="res-row">
+      <img class="res-img" src="${r.playlist.images?.[0]?.url||''}" onerror="this.style.opacity=0"/>
+      <div>
+        <div class="res-name">${r.playlist.name}</div>
+        <div class="res-meta">Fingerprinted from ${r.centroid.sampleSize} tracks</div>
+        <div class="cpills">
+          <span class="cp hi">${bpmStr}</span>
+          ${topMoods.map(m=>`<span class="cp mood">${m}</span>`).join('')}
+          ${topGenres.map(g=>`<span class="cp">${g}</span>`).join('')}
+        </div>
+      </div>
+      <div class="res-count">${r.count>0?'+'+r.count:'—'}<small>tracks added</small></div>
+      <a class="res-open" href="https://open.spotify.com/playlist/${r.playlist.id}" target="_blank">Open ↗</a>
+    </div>`;
+  }).join('');
+
+  if(stats.skipped_conf>0){
+    document.getElementById('skipped-notice').innerHTML=`
+      <div class="skipped-notice">
+        ⚠ ${stats.skipped_conf} songs didn't match any playlist closely enough and were skipped.
+        Try raising the confidence threshold in options, or add more playlists as targets.
+        ${stats.no_data>0?`<br>${stats.no_data} songs had no Cyanite or Last.fm data available.`:''}
+      </div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PLAYLIST PICKER UI
+// ══════════════════════════════════════════════════════════════════
+function buildPicker(playlists){
+  const grid=document.getElementById('pl-grid');
+  grid.innerHTML=playlists.map(pl=>`
+    <div class="pl-item" data-id="${pl.id}" onclick="togglePl('${pl.id}',this)">
+      <img class="pl-img" src="${pl.images?.[0]?.url||''}" onerror="this.style.opacity=0.2"/>
+      <div style="min-width:0;flex:1">
+        <div class="pl-name">${pl.name}</div>
+        <div class="pl-meta">${pl.tracks?.total||0} tracks</div>
+      </div>
+      <div class="pl-check">✓</div>
+    </div>`).join('');
+  updatePickCount();
+}
+function togglePl(id,el){
+  if(selectedPlIds.has(id)){selectedPlIds.delete(id);el.classList.remove('sel');}
+  else{selectedPlIds.add(id);el.classList.add('sel');}
+  updatePickCount();
+}
+function updatePickCount(){
+  document.getElementById('pick-count').textContent=`${selectedPlIds.size} selected`;
+  document.getElementById('btn-to-opts').disabled=selectedPlIds.size===0;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// STEP NAVIGATION
+// ══════════════════════════════════════════════════════════════════
+function goStep(n){
+  for(let i=0;i<5;i++){
+    const el=document.getElementById(`step-${i}`);
+    if(el) el.classList.toggle('hidden',i!==n);
+    const dot=document.querySelector(`.step-dot[data-step="${i}"]`);
+    if(dot){
+      dot.classList.remove('active','done');
+      if(i===n) dot.classList.add('active');
+      else if(i<n) dot.classList.add('done');
+    }
+  }
+  currentStep=n;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// AUTH FLOW
+// ══════════════════════════════════════════════════════════════════
+async function startLogin(){
+  clientId=document.getElementById('sp-client-id').value.trim();
+  cyToken=document.getElementById('cy-token').value.trim();
+  lfmKey=document.getElementById('lfm-key').value.trim();
+  if(!clientId){alert('Please enter your Spotify Client ID');return;}
+  if(!cyToken){alert('Please enter your Cyanite access token');return;}
+  // Last.fm is optional but strongly recommended
+  localStorage.setItem('sortify_cid',clientId);
+  localStorage.setItem('sortify_cy',cyToken);
+  localStorage.setItem('sortify_lfm',lfmKey);
+  const verifier=genVerifier();
+  const challenge=await genChallenge(verifier);
+  localStorage.setItem('sortify_pv',verifier);
+  const params=new URLSearchParams({
+    client_id:clientId,response_type:'code',redirect_uri:redir(),
+    code_challenge_method:'S256',code_challenge:challenge,scope:SP_SCOPES
+  });
+  window.location=`https://accounts.spotify.com/authorize?${params}`;
+}
+
+async function handleCallback(code){
+  clientId=localStorage.getItem('sortify_cid');
+  cyToken=localStorage.getItem('sortify_cy');
+  lfmKey=localStorage.getItem('sortify_lfm');
+  const verifier=localStorage.getItem('sortify_pv');
+  const res=await fetch('https://accounts.spotify.com/api/token',{
+    method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:new URLSearchParams({grant_type:'authorization_code',code,redirect_uri:redir(),client_id:clientId,code_verifier:verifier})
+  });
+  const data=await res.json();
+  if(!data.access_token) throw new Error('Token exchange failed: '+JSON.stringify(data));
+  spToken=data.access_token;
+  history.replaceState({},document.title,redir());
+
+  // Load playlists
+  goStep(1);
+  const me=await spGet('https://api.spotify.com/v1/me');
+  userId=me.id;
+  allPlaylists=await spPages('https://api.spotify.com/v1/me/playlists?limit=50');
+  allPlaylists=allPlaylists.filter(p=>p.owner?.id===userId); // only own playlists
+  buildPicker(allPlaylists);
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+// ══════════════════════════════════════════════════════════════════
+// INIT & EVENT LISTENERS
+// ══════════════════════════════════════════════════════════════════
+window.togglePl=togglePl;
+
+document.getElementById('redir-display').textContent=redir();
+document.getElementById('btn-connect').addEventListener('click',startLogin);
+document.getElementById('btn-to-opts').addEventListener('click',()=>goStep(2));
+document.getElementById('btn-back-0').addEventListener('click',()=>goStep(0));
+document.getElementById('btn-back-1').addEventListener('click',()=>goStep(1));
+document.getElementById('btn-run').addEventListener('click',runSort);
+document.getElementById('btn-restart').addEventListener('click',()=>{
+  localStorage.removeItem('sortify_pv');
+  goStep(0);
+});
+document.getElementById('btn-all').addEventListener('click',()=>{
+  allPlaylists.forEach(p=>{selectedPlIds.add(p.id);document.querySelector(`[data-id="${p.id}"]`)?.classList.add('sel');});
+  updatePickCount();
+});
+document.getElementById('btn-none').addEventListener('click',()=>{
+  selectedPlIds.clear();
+  document.querySelectorAll('.pl-item').forEach(el=>el.classList.remove('sel'));
+  updatePickCount();
+});
+document.getElementById('thresh').addEventListener('input',function(){
+  document.getElementById('thresh-val').textContent=parseFloat(this.value).toFixed(2);
+});
+document.getElementById('sample-rate').addEventListener('input',function(){
+  document.getElementById('sample-val').textContent=this.value;
+});
+
+// Restore saved values
+['sortify_cid','sortify_cy','sortify_lfm'].forEach((k,i)=>{
+  const v=localStorage.getItem(k);
+  if(v) document.getElementById(['sp-client-id','cy-token','lfm-key'][i]).value=v;
+});
+
+// OAuth callback
+const urlP=new URLSearchParams(window.location.search);
+const code=urlP.get('code');
+if(code){
+  handleCallback(code).catch(e=>{alert('Auth error: '+e.message);goStep(0);});
+}
+</script>
+</body>
+</html>
